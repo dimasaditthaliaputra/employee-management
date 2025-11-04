@@ -82,6 +82,18 @@ switch ($action) {
         $employeeModel->refreshDashboard();
         header("Location: index.php?action=dashboard&message=refreshed");
         break;
+    case 'salary_stats':
+        $stats = $employeeModel->getSalaryStat();
+        include 'views/salary_stats.php';
+        break;
+    case 'tenure_stats':
+        $stats = $employeeModel->getTenureStats();
+        include 'views/tenure_stats.php';
+        break;
+    case 'overview':
+        $stats = $employeeModel->getEmployeesOverview();
+        include 'views/employee_overview.php';
+        break;
     default:
         $dashboard = $employeeModel->getDashboardSummary();
         include 'views/dashboard.php';

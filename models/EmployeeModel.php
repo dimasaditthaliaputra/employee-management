@@ -121,5 +121,65 @@ class EmployeeModel
         $stmt = $this->conn->prepare($query);
         return $stmt->execute();
     }
+
+    // METHOD 10: Menampilkan Rata-rata gaji, gaji tertinggi, gaji terendah per departemen
+    public function getSalaryStat(): mixed
+    {
+        $query = "SELECT department,
+                    ROUND (AVG(salary), 2) as avg_salary,
+                    MAX (salary) as max_salary,
+                    MIN(salary) as min_salary
+                    FROM employees
+                    GROUP BY department
+                    ORDER BY department DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt;
+    }
+    public function getTenureStats()
+    {
+        $query = "SELECT 
+                tenure_level,
+                COUNT(*) AS total_employees,
+                ROUND(AVG(salary), 2) AS avg_salary,
+                SUM(salary) AS total_salary_budget
+                FROM (
+                    SELECT 
+                        CASE 
+                            WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, hire_date)) < 1 THEN 'Junior'
+                            WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, hire_date)) BETWEEN 1 AND 3 THEN 'Middle'
+                            ELSE 'Senior'
+                        END AS tenure_level,
+                        salary
+                    FROM employees
+                ) AS sub
+                GROUP BY tenure_level
+                ORDER BY 
+                    CASE tenure_level
+                        WHEN 'Junior' THEN 1
+                        WHEN 'Middle' THEN 2
+                        WHEN 'Senior' THEN 3
+                    END";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt;
+    }
+    public function getEmployeesOverview()
+    {
+        $query = "SELECT
+                COUNT(*) as total_employees,
+                SUM(salary) as total_salary,
+                ROUND(AVG(salary), 2) as avg_salary,
+                MIN(salary) as min_salary,
+                MAX(salary) as max_salary,
+                ROUND(AVG(EXTRACT(YEAR FROM AGE(CURRENT_DATE, hire_date))), 1) as avg_tenure_years,
+                ROUND(MIN(EXTRACT(YEAR FROM AGE(CURRENT_DATE, hire_date))), 1) as min_tenure_years,
+                ROUND(MAX(EXTRACT(YEAR FROM AGE(CURRENT_DATE, hire_date))), 1) as max_tenure_years
+            FROM employees";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt;
+    }
 }
-?>
